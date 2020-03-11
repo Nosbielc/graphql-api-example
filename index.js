@@ -1,34 +1,48 @@
 const { ApolloServer, gql } = require('apollo-server')
 
+const perfis = [
+    {id: 1, nome: 'comum'},
+    {id: 2, nome: 'administrator'}
+]
+
 const usuarios = [{
         id : 1,
         nome : "First",
         email : "first@gmail.com",
-        idade : 20
+        idade : 20,
+        perfil_id: 1
     },
     {
         id : 2,
         nome : "Second",
         email : "second@gmail.com",
-        idade : 18
+        idade : 18,
+        perfil_id: 2
     },
     {
         id : 3,
         nome : "other",
         email : "other@gmail.com",
-        idade : 48
+        idade : 48,
+        perfil_id: 1
     }]
 
 const typeDefs = gql`
     scalar Date
-    
+
     type Usuario {
-        id: ID
+        id: Int
         nome: String!
         email: String!
         idade: Int
         salario: Float
         vip: Boolean
+        perfil: Perfil
+    }
+    
+    type Perfil {
+        id: Int,
+        nome: String!
     }
     
     type Produto {
@@ -45,7 +59,10 @@ const typeDefs = gql`
       usuarioLogado : Usuario
       produtoEmDestaque : Produto
       numerosMegaSena : [Int!]!
-      usuarios : [Usuario]  
+      usuarios : [Usuario]
+      usuario(id: Int): Usuario
+      perfis: [Perfil]
+      perfil(id: Int): Perfil  
     }
 `
 
@@ -54,6 +71,11 @@ const resolvers = {
     Usuario: {
         salario(usuario) {
             return usuario.salario_real
+        },
+        perfil(usuario) {
+            const selct = perfis
+                .filter(u => u.id === usuario.perfil_id)
+            return selct ? selct[0] : null
         }
     },
     Produto: {
@@ -97,6 +119,19 @@ const resolvers = {
         },
         usuarios() {
             return usuarios
+        },
+        usuario(_, { id }) {
+            const selct = usuarios
+                .filter(u => u.id === id)
+            return selct ? selct[0] : null
+        },
+        perfis() {
+            return perfis
+        },
+        perfil(_, { id }) {
+            const selct = perfis
+                .filter(p => p.id === id)
+            return selct ? selct[0] : null
         }
     }
 }
